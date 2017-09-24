@@ -5,8 +5,8 @@
 #include "net/gnrc/udp.h"
 #include "phydat.h"
 #include "saul_reg.h"
-#include "periph/adc.h"
 #include "periph/dmac.h"
+#include "periph/i2c.h"
 #include "periph/timer.h"
 
 #define ENABLE_DEBUG    (1)
@@ -16,7 +16,7 @@
 #define SAMPLE_INTERVAL ( 1000000UL)
 #endif
 
-saul_reg_t *sensor_light_t   = NULL;
+saul_reg_t *sensor_hum_t   = NULL;
 
 void critical_error(void) {
     DEBUG("CRITICAL ERROR, REBOOT\n");
@@ -25,12 +25,12 @@ void critical_error(void) {
 }
 
 void sensor_config(void) {
-    sensor_light_t   = saul_reg_find_type(SAUL_SENSE_LIGHT);
-	if (sensor_light_t == NULL) {
-		DEBUG("[ERROR] Failed to init LIGHT sensor\n");
+    sensor_hum_t = saul_reg_find_type(SAUL_SENSE_HUM);
+	if (sensor_hum_t == NULL) {
+		DEBUG("[ERROR] Failed to init HUM sensor\n");
 		critical_error();
 	} else {
-		DEBUG("LIGHT sensor OK\n");
+		DEBUG("HUM sensor OK\n");
 	}
 }
 
@@ -40,14 +40,14 @@ void sample(void) {
 	int dim;         /* Demension of sensor output */
 
     /* Illumination 1-dim */
-	dim = saul_reg_read(sensor_light_t, &output);
+	dim = saul_reg_read(sensor_hum_t, &output);
     (void) dim;
     //phydat_dump(&output, dim);
 }
 
 int main(void) {
     dmac_init();
-    //adc_set_dma_channel(0);
+    i2c_set_dma_channel(0, 0);
 
     sensor_config();
 	LED_OFF;

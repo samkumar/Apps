@@ -7,6 +7,8 @@
 #include "saul_reg.h"
 #include "periph/adc.h"
 #include "periph/dmac.h"
+#include "periph/i2c.h"
+#include "periph/spi.h"
 #include "periph/timer.h"
 
 #define ENABLE_DEBUG    (1)
@@ -299,6 +301,8 @@ int main(void) {
     sensor_config();
     dmac_init();
     adc_set_dma_channel(0);
+    i2c_set_dma_channel(0, 1);
+    spi_set_dma_channel(0, 2, 3);
 	//uint16_t i = 0;
 	//uint16_t j = 0;
 	LED_OFF;
