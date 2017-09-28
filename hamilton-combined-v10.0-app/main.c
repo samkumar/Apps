@@ -15,7 +15,7 @@
 #include "debug.h"
 
 #ifndef SAMPLE_INTERVAL
-#define SAMPLE_INTERVAL ( 100000UL)
+#define SAMPLE_INTERVAL (30000000UL)
 #endif
 #define SAMPLE_JITTER   ( 200000UL)
 
@@ -296,7 +296,6 @@ void aes_populate(void) {
 
 int main(void) {
     //This value is good randomness and unique per mote
-//    phydat_t output;
     srand(*((uint32_t*)fb_aes128_key));
     crypto_init();
     sensor_config();
@@ -305,28 +304,26 @@ int main(void) {
 #if DMAC_ENABLE
     dmac_init();
     adc_set_dma_channel(DMAC_CHANNEL_ADC);
-    //i2c_set_dma_channel(I2C_0,DMAC_CHANNEL_I2C);
-    //spi_set_dma_channel(0,DMAC_CHANNEL_SPI_TX,DMAC_CHANNEL_SPI_RX);
+    i2c_set_dma_channel(I2C_0,DMAC_CHANNEL_I2C);
+    spi_set_dma_channel(0,DMAC_CHANNEL_SPI_TX,DMAC_CHANNEL_SPI_RX);
 #endif
 	LED_OFF;
 
   	printf("size %u\n", sizeof(ham7c_t));
     while (1) {
 		//Sample
-	    //sample(&frontbuf);
-//saul_reg_read(sensor_light_t, &output);
+	    sample(&frontbuf);
 #if CLOCK_USE_ADAPTIVE
         sysclk_change(true);
 #endif
-		//aes_populate();
+		aes_populate();
 		//Send
-		//send_udp("ff02::1",4747,obuffer,sizeof(obuffer));
+		send_udp("ff02::1",4747,obuffer,sizeof(obuffer));
 #if CLOCK_USE_ADAPTIVE
         sysclk_change(false);
 #endif
 		//Sleep
-		//xtimer_periodic_wakeup(&last_wakeup, interval_with_jitter());
-        //printf("main to sleep\n");
+		printf("main to sleep\n");
 		xtimer_usleep(interval_with_jitter());
     }
 

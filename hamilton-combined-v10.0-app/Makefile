@@ -1,5 +1,5 @@
-APPLICATION = hamilton_easyapp
-RIOTBASE ?= /home/hskim/Desktop/RIOT-OS
+APPLICATION = hamilton_periodic_sensing_sending
+RIOTBASE = /home/hskim/Desktop/rebase/RIOT-OS
 BOARD = hamilton
 
 # System functions
@@ -10,9 +10,9 @@ CFLAGS    += -DRTT_STDIO_DISABLE_STDIN
 CFLAGS    += -DTHREAD_STACKSIZE_DEFAULT=2048
 
 # CPU clock speed
-CFLAGS    += -DCLOCK_USE_OSCULP32_DFLL=0
+CFLAGS    += -DCLOCK_USE_OSCULP32_DFLL=1
 CFLAGS    += -DCLOCK_USE_ADAPTIVE=0
-CFLAGS    += -DSENSOR_COMPUTOFFLOAD=0
+CFLAGS    += -DSENSOR_COMPUTOFFLOAD=1
 CFLAGS    += -DDMAC_ENABLE=0
 
 # Sensors
@@ -40,8 +40,7 @@ CFLAGS    += -DIEEE802154_DEFAULT_CHANNEL=26
 USEMODULE += gnrc_netdev_default
 USEMODULE += auto_init_gnrc_netif
 # Duty-cycling 
-#USEMODULE += gnrc_lasmac
-USEMODULE += gnrc_netdev
+USEMODULE += gnrc_lasmac
 CFLAGS    += -DDUTYCYCLE_SLEEP_INTERVAL=00000UL # If it is ZERO, no duty-cycling for packet reception
 CFLAGS    += -DLEAF_NODE=1                       # Default is 1  
 # Specify the mandatory networking modules for IPv6 and UDP

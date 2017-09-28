@@ -7,7 +7,7 @@ BOARD ?= samr21-xpro
 BOARD_WHITELIST := hamilton samr21-xpro iotlab-m3 fox iotlab-a8-m3
 
 # This has to be the absolute path to the RIOT base directory:
-RIOTBASE = /home/hskim/Desktop/wpantund/RIOT-OS
+RIOTBASE = /home/hskim/Desktop/RIOT-OS
 
 # Comment this out to disable code in RIOT that does safety checking
 # which is not needed in a production environment but helps in the
