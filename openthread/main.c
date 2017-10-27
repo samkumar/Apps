@@ -22,7 +22,7 @@
 #include "periph/spi.h"
 
 #ifndef SAMPLE_INTERVAL
-#define SAMPLE_INTERVAL (2000000000UL)
+#define SAMPLE_INTERVAL (1000000UL)
 #endif
 
 int main(void)
@@ -47,7 +47,8 @@ int main(void)
 		//send_udp("ff02::1",4747,obuffer,sizeof(obuffer));
 		//Sleep
 		//xtimer_periodic_wakeup(&last_wakeup, interval_with_jitter());
-		xtimer_usleep(SAMPLE_INTERVAL);
+        xtimer_usleep(SAMPLE_INTERVAL);
+        thread_yield();
     }
     return 0;
 }
