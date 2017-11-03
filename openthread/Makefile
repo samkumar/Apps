@@ -7,7 +7,7 @@ BOARD ?= hamilton
 BOARD_WHITELIST := hamilton samr21-xpro iotlab-m3 fox iotlab-a8-m3
 
 # This has to be the absolute path to the RIOT base directory:
-RIOTBASE ?= /home/hskim/Desktop/rebase/RIOT-OS
+RIOTBASE = /home/hskim/Desktop/RIOT-OS
 
 # Comment this out to disable code in RIOT that does safety checking
 # which is not needed in a production environment but helps in the
@@ -68,7 +68,7 @@ USEMODULE += tmp006          # ambient temperature
 USEMODULE += hdc1000         # humidity and temperature
 USEMODULE += fxos8700        # acceleration and magnetic field
 USEMODULE += apds9007        # illumination
-USEMODULE += ekmb1101111     # pir-based occupancy
+USEMODULE += ekmb    # pir-based occupancy
 USEMODULE += pulse_counter     # simple button
 endif
 
@@ -81,7 +81,6 @@ CFLAGS    += -DRTT_STDIO_DISABLE_STDIN
 #CFLAGS    += -DRTT_STDIO_ENABLE_BLOCKING_STDOUT
 #CFLAGS    += -DSTDIO_POLL_INTERVAL=5000U
 CFLAGS    += -DTHREAD_STACKSIZE_DEFAULT=2048
-#CFLAGS    += -DISR_STACKSIZE=2048
 
 #required for C++ compiling
 CXXEXFLAGS += -fno-rtti
