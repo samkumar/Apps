@@ -7,7 +7,10 @@ BOARD ?= samr21-xpro
 BOARD_WHITELIST := hamilton samr21-xpro iotlab-m3 fox iotlab-a8-m3
 
 # This has to be the absolute path to the RIOT base directory:
-RIOTBASE = /home/hskim/Desktop/RIOT-OS
+RIOTBASE ?= /home/hskim/Desktop/RIOT-OS
+
+# This is to set the proper programmer for board
+PROGRAMMER ?= jlink
 
 # Comment this out to disable code in RIOT that does safety checking
 # which is not needed in a production environment but helps in the
@@ -39,26 +42,18 @@ endif
 
 ifneq (,$(filter at86rf2%,$(DRIVER)))
   FEATURES_REQUIRED += periph_spi periph_gpio
+  CFLAGS += -DAUTO_CSMA_EN=1
 endif
 
 USEMODULE += $(DRIVER)
-
-#CFLAGS    += -DCLOCK_USE_OSCULP32_DFLL=1
-# CPU clock speed
-#CFLAGS    += -DBORDER_ROUTER=1
-
-# Sensors
-#USEMODULE += saul_reg        # SAUL: sensor/actuator abstraction layer 
-#USEMODULE += auto_init_saul  
-#USEMODULE += fxos8700        # acceleration and magnetic field
 
 USEMODULE += xtimer
 USEMODULE += random
 USEMODULE += ps
 
-#USEMODULE += rtt_stdio
-#CFLAGS    += -DRTT_STDIO_DISABLE_STDIN
-#CFLAGS    += -DTHREAD_STACKSIZE_DEFAULT=2048
+USEMODULE += rtt_stdio
+CFLAGS    += -DRTT_STDIO_DISABLE_STDIN
+CFLAGS    += -DTHREAD_STACKSIZE_DEFAULT=2048
 
 #required for C++ compiling
 CXXEXFLAGS += -fno-rtti

@@ -1,13 +1,16 @@
 APPLICATION = openthread
 
 # If no BOARD is found in the environment, use this default:
-BOARD ?= hamilton
+#BOARD ?= hamilton
 
 # These are the boards that OpenThread stack has been tested on
 BOARD_WHITELIST := hamilton samr21-xpro iotlab-m3 fox iotlab-a8-m3
 
 # This has to be the absolute path to the RIOT base directory:
 RIOTBASE = /home/hskim/Desktop/RIOT-OS
+
+# This is to set the proper programmer for board
+PROGRAMMER ?= jlink
 
 # Comment this out to disable code in RIOT that does safety checking
 # which is not needed in a production environment but helps in the
@@ -25,10 +28,12 @@ ifeq ($(OPENTHREAD_TYPE),mtd)
     # routerrole on an MTD. At the same time, an MTD may or may not be sleepy.
     USEMODULE += openthread-mtd
     USEMODULE += openthread-cli-mtd
+    BOARD ?= hamilton
 else
     # ftd: A Full Thread Device has router functionality compiled in
     USEMODULE += openthread-ftd
     USEMODULE += openthread-cli-ftd
+    BOARD ?= samr21-xpro
 endif
 
 #Define PANID, CHANNEL and UART_BAUDRATE used by default
@@ -42,6 +47,7 @@ CFLAGS += -DOPENTHREAD_UART_BAUDRATE=${OPENTHREAD_UART_BAUDRATE}
 
 ifneq (,$(filter hamilton samr21-xpro,$(BOARD)))
   DRIVER := at86rf233
+  CFLAGS    += -DAUTO_CSMA_EN=1
 endif
 ifneq (,$(filter iotlab-m3 fox iotlab-a8-m3,$(BOARD)))
   DRIVER := at86rf231
@@ -53,23 +59,21 @@ endif
 
 USEMODULE += $(DRIVER)
 
-CFLAGS    += -DCLOCK_USE_OSCULP32_DFLL=1
-CFLAGS    += -DCLOCK_USE_ADAPTIVE=0
-CFLAGS    += -DSENSOR_COMPUTOFFLOAD=1
-CFLAGS    += -DDMAC_ENABLE=0
-CFLAGS    += -DAUTO_CSMA_EN=1
-
 # CPU clock speed
 ifneq (,$(filter hamilton,$(BOARD)))
-# Sensors
-USEMODULE += saul_reg        # SAUL: sensor/actuator abstraction layer 
-USEMODULE += auto_init_saul  
-USEMODULE += tmp006          # ambient temperature
-USEMODULE += hdc1000         # humidity and temperature
-USEMODULE += fxos8700        # acceleration and magnetic field
-USEMODULE += apds9007        # illumination
-USEMODULE += ekmb    # pir-based occupancy
-USEMODULE += pulse_counter     # simple button
+  CFLAGS    += -DCLOCK_USE_OSCULP32_DFLL=1
+  CFLAGS    += -DCLOCK_USE_ADAPTIVE=0
+  CFLAGS    += -DSENSOR_COMPUTOFFLOAD=1
+  CFLAGS    += -DDMAC_ENABLE=0
+  # Sensors
+  USEMODULE += saul_reg        # SAUL: sensor/actuator abstraction layer 
+  USEMODULE += auto_init_saul  
+  USEMODULE += tmp006          # ambient temperature
+  USEMODULE += hdc1000         # humidity and temperature
+  USEMODULE += fxos8700        # acceleration and magnetic field
+  USEMODULE += apds9007        # illumination
+  USEMODULE += ekmb            # pir-based occupancy
+  USEMODULE += pulse_counter   # simple button
 endif
 
 USEMODULE += xtimer
