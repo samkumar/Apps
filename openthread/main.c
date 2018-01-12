@@ -43,8 +43,10 @@ uint32_t interval_with_jitter(void)
 }
 uint8_t borderRouteChangeCnt = 0;
 uint8_t borderRouterLC = 0;
+uint8_t borderRouterRC = 0;
 uint16_t myRloc = 0;
 uint16_t nextHopRloc = 0;
+uint8_t debugNumFreeBuffers = 0;
 
 uint32_t addressMsgCnt = 0;
 uint32_t joiningMsgCnt = 0;
@@ -120,6 +122,8 @@ int main(void)
 
         // border router route metrics
         buf[13] = borderRouteChangeCnt;
+        buf[11] = debugNumFreeBuffers;
+        buf[10] = borderRouterRC;
         buf[9] = borderRouterLC;
 
         buf[8] = joiningMsgCnt & 0xff;
