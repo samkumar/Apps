@@ -33,7 +33,9 @@ else
     # ftd: A Full Thread Device has router functionality compiled in
     USEMODULE += openthread-ftd
     USEMODULE += openthread-cli-ftd
-    BOARD ?= samr21-xpro
+    #BOARD ?= samr21-xpro
+    BOARD ?= hamilton
+    CFLAGS += -DCLOCK_USE_PLL=1
 endif
 
 #Define PANID, CHANNEL and UART_BAUDRATE used by default
@@ -59,10 +61,10 @@ ifneq (,$(filter at86rf2%,$(DRIVER)))
 endif
 
 USEMODULE += $(DRIVER)
+USEMODULE += schedstatistics
 
 # CPU clock speed
 ifneq (,$(filter hamilton,$(BOARD)))
-  CFLAGS    += -DCLOCK_USE_OSCULP32_DFLL=1
   CFLAGS    += -DCLOCK_USE_ADAPTIVE=0
   CFLAGS    += -DSENSOR_COMPUTOFFLOAD=1
   CFLAGS    += -DDMAC_ENABLE=0
@@ -80,6 +82,9 @@ endif
 USEMODULE += xtimer
 USEMODULE += random
 USEMODULE += ps
+
+CFLAGS += -DRADIO_DUTYCYCLE_MONITOR=1
+CFLAGS += -DCPU_DUTYCYCLE_MONITOR=1
 
 USEMODULE += rtt_stdio
 CFLAGS    += -DRTT_STDIO_DISABLE_STDIN
