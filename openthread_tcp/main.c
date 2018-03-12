@@ -126,11 +126,18 @@ uint32_t totalSerialMsgCnt = 0;
 /* Size of blocks in which the receiver consumes the data. */
 #define READ_SIZE 512
 
+extern int sent_pkts;
+extern int recv_pkts;
+
 void print_tcp_stats(void) {
     printf("Sent %d TCP segments\n", (int) sent_pkts);
     printf("Received %d TCP segments\n", (int) recv_pkts);
+#ifdef CPU_DUTYCYCLE_MONITOR
     printf("CPU: on = %llu, off = %llu\n", cpuOnTime, cpuOffTime);
+#endif
+#ifdef RADIO_DUTYCYCLE_MONITOR
     printf("Radio: on = %llu, off = %llu\n", radioOnTime, radioOffTime);
+#endif
 }
 
 int tcp_receiver(void (*onaccept)(void), void (*onfinished)(int)) {
@@ -173,6 +180,7 @@ int tcp_receiver(void (*onaccept)(void), void (*onfinished)(int)) {
                 onaccept();
             }
             volatile uint64_t t1 = xtimer_now_usec64();
+            printf("Time = %llu, Received: 0\n", xtimer_now_usec64());
             while (total_received != TOTAL_BYTES) {
                 size_t readsofar = 0;
                 ssize_t r;
@@ -192,7 +200,7 @@ int tcp_receiver(void (*onaccept)(void), void (*onfinished)(int)) {
 
                 /* Print for every 1024 bytes received. */
                 if ((total_received & 0x3FF) == 0) {
-                    printf("Received: %d\n", (int) total_received);
+                    printf("Time = %llu, Received: %d\n", xtimer_now_usec64(), (int) total_received);
                 }
             }
             volatile uint64_t t2 = xtimer_now_usec64();
@@ -260,6 +268,7 @@ int tcp_sender(const char* receiver_ip, void (*ondone)(int)) {
 
     int i;
     size_t total_sent = 0;
+    printf("Time = %llu, Sent: 0\n", xtimer_now_usec64());
     for (i = 0; i != NUM_BLOCKS; i++) {
         rv = send(sock, sendbuffer, BLOCK_SIZE, 0);
         if (rv == -1) {
@@ -268,7 +277,7 @@ int tcp_sender(const char* receiver_ip, void (*ondone)(int)) {
         }
         total_sent += BLOCK_SIZE;
         if ((total_sent & 0x3FF) == 0) {
-            printf("Sent: %d\n", (int) total_sent);
+            printf("Time = %llu, Sent: %d\n", xtimer_now_usec64(), (int) total_sent);
         }
     }
 

@@ -7,7 +7,7 @@ APPLICATION = openthread
 BOARD_WHITELIST := hamilton samr21-xpro iotlab-m3 fox iotlab-a8-m3
 
 # This has to be the absolute path to the RIOT base directory:
-RIOTBASE = /home/hskim/Desktop/RIOT-OS
+RIOTBASE = /home/sam/Documents/Research/RIOT-OS
 
 # This is to set the proper programmer for board
 PROGRAMMER ?= jlink
@@ -40,7 +40,7 @@ endif
 
 #Define PANID, CHANNEL, TXPOWER, and UART_BAUDRATE used by default
 OPENTHREAD_PANID ?= 0xbeef
-OPENTHREAD_CHANNEL ?= 26
+OPENTHREAD_CHANNEL ?= 24
 OPENTHREAD_TXPOWER ?= 4
 OPENTHREAD_UART_BAUDRATE ?= 115200
 
@@ -71,14 +71,22 @@ ifneq (,$(filter hamilton,$(BOARD)))
   CFLAGS    += -DSENSOR_COMPUTOFFLOAD=1
   CFLAGS    += -DDMAC_ENABLE=0
   # Sensors
-  USEMODULE += saul_reg        # SAUL: sensor/actuator abstraction layer 
-  USEMODULE += auto_init_saul  
+  USEMODULE += saul_reg        # SAUL: sensor/actuator abstraction layer
+  USEMODULE += auto_init_saul
   USEMODULE += tmp006          # ambient temperature
   USEMODULE += hdc1000         # humidity and temperature
   USEMODULE += fxos8700        # acceleration and magnetic field
   USEMODULE += apds9007        # illumination
   USEMODULE += ekmb            # pir-based occupancy
   USEMODULE += pulse_counter   # simple button
+  USEMODULE += task_sched
+  USEMODULE += tcp_freebsd
+  USEMODULE += tcp_freebsd_internal
+  USEMODULE += tcp_freebsd_internal_cc
+  USEMODULE += ipv6_addr
+  CFLAGS += -DSOCK_HAS_IPV6
+  USEMODULE += posix_sockets
+  USEMODULE += sock_tcp_freebsd
 endif
 
 USEMODULE += xtimer

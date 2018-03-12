@@ -9,7 +9,7 @@
 /**
  * @file
  * @brief       OpenThread test application
- * 
+ *
  * @author      Hyung-Sin Kim <hs.kim@cs.berkeley.edu>
  */
 
@@ -25,11 +25,16 @@
 #include "periph/i2c.h"
 #include "periph/spi.h"
 
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <unistd.h>
+
 #ifndef SAMPLE_INTERVAL
-#define SAMPLE_INTERVAL (30000000UL)
+#define SAMPLE_INTERVAL (3000000UL)
 #endif
-#define SAMPLE_JITTER   (15000000UL)
-#define PAYLOAD_SIZE (89)
+#define SAMPLE_JITTER   (0UL)
+#define PAYLOAD_SIZE (189)
 
 #define ENABLE_DEBUG (1)
 #include "debug.h"
@@ -99,16 +104,19 @@ int main(void)
     adc_set_dma_channel(DMAC_CHANNEL_ADC);
     i2c_set_dma_channel(I2C_0,DMAC_CHANNEL_I2C);
     spi_set_dma_channel(0,DMAC_CHANNEL_SPI_TX,DMAC_CHANNEL_SPI_RX);
-#endif 
-    DEBUG("This a test for OpenThread\n");    
-    xtimer_usleep(100000000ul);
+#endif
+    DEBUG("This a test for OpenThread\n");
+    xtimer_usleep(1000000ul);
+
+    int s = socket(AF_INET6, SOCK_STREAM, 0);
+    (void) s;
 
     DEBUG("\n[Main] Start UDP\n");
 	otError error;
 
-    DEBUG("[Main] Msg Creation\n");    
+    DEBUG("[Main] Msg Creation\n");
 	memset(&messageInfo, 0, sizeof(messageInfo));
-	otIp6AddressFromString("fdde:ad00:beef:0000:c684:4ab6:ac8f:9fe5", &messageInfo.mPeerAddr);
+	otIp6AddressFromString("fdde:ad00:beef:0000:9a93:b693:abfa:9def", &messageInfo.mPeerAddr);
 	//otIp6AddressFromString("2001:0470:4a71:0000:0ec4:7aff:fe73:a395", &messageInfo.mPeerAddr);
     messageInfo.mPeerPort = 1234;
     messageInfo.mInterfaceId = 1;
@@ -122,14 +130,14 @@ int main(void)
 	    //sample(&frontbuf);
 		//aes_populate();
 		//Sleep
-        xtimer_usleep(interval_with_jitter());        
+        xtimer_usleep(interval_with_jitter());
 
 		//Send
-        message = otUdpNewMessage(openthread_get_instance(), true);
+        message = otUdpNewMessage(openthread_get_instance(), false);
         if (message == NULL) {
             DEBUG("error in new message");
         }
-        
+
         /* Identity */
         buf[0] = source;
         buf[2] = myRloc & 0xff;
@@ -144,14 +152,14 @@ int main(void)
 #ifdef CPU_DUTYCYCLE_MONITOR
         /* context switch */
         buf[8] = contextSwitchCnt & 0xff;
-        buf[7] = (contextSwitchCnt >> 8) & 0xff; 
-        buf[6] = (contextSwitchCnt >> 16) & 0xff; 
+        buf[7] = (contextSwitchCnt >> 8) & 0xff;
+        buf[6] = (contextSwitchCnt >> 16) & 0xff;
         buf[5] = (contextSwitchCnt >> 24) & 0xff;
 
         /* context switch */
         buf[12] = preemptCnt & 0xff;
-        buf[11] = (preemptCnt >> 8) & 0xff; 
-        buf[10] = (preemptCnt >> 16) & 0xff; 
+        buf[11] = (preemptCnt >> 8) & 0xff;
+        buf[10] = (preemptCnt >> 16) & 0xff;
         buf[9] = (preemptCnt >> 24) & 0xff;
 
         uint16_t cpuDutycycle = (uint16_t) (10000 * cpuOnTime / (cpuOnTime + cpuOffTime));
@@ -162,33 +170,33 @@ int main(void)
         /* Radio duty-cycle */
         uint16_t radioDutycycle = (uint16_t) (10000 * radioOnTime / (radioOnTime + radioOffTime));
         buf[16] = radioDutycycle & 0xff;
-        buf[15] = (radioDutycycle >> 8) & 0xff; 
+        buf[15] = (radioDutycycle >> 8) & 0xff;
 #endif
         /* Link Performance */
         buf[20] = packetSuccessCnt & 0xff;
-        buf[19] = (packetSuccessCnt >> 8) & 0xff; 
-        buf[18] = (packetSuccessCnt >> 16) & 0xff; 
+        buf[19] = (packetSuccessCnt >> 8) & 0xff;
+        buf[18] = (packetSuccessCnt >> 16) & 0xff;
         buf[17] = (packetSuccessCnt >> 24) & 0xff;
 
         buf[24] = packetBusyChannelCnt & 0xff;
-        buf[23] = (packetBusyChannelCnt >> 8) & 0xff; 
-        buf[22] = (packetBusyChannelCnt >> 16) & 0xff; 
+        buf[23] = (packetBusyChannelCnt >> 8) & 0xff;
+        buf[22] = (packetBusyChannelCnt >> 16) & 0xff;
         buf[21] = (packetBusyChannelCnt >> 24) & 0xff;
 
         buf[28] = packetFailCnt & 0xff;
-        buf[27] = (packetFailCnt >> 8) & 0xff; 
-        buf[26] = (packetFailCnt >> 16) & 0xff; 
+        buf[27] = (packetFailCnt >> 8) & 0xff;
+        buf[26] = (packetFailCnt >> 16) & 0xff;
         buf[25] = (packetFailCnt >> 24) & 0xff;
 
         buf[32] = broadcastCnt & 0xff;
-        buf[31] = (broadcastCnt >> 8) & 0xff; 
-        buf[30] = (broadcastCnt >> 16) & 0xff; 
+        buf[31] = (broadcastCnt >> 8) & 0xff;
+        buf[30] = (broadcastCnt >> 16) & 0xff;
         buf[29] = (broadcastCnt >> 24) & 0xff;
 
         /* Queue Overflow */
         buf[36] = queueOverflowCnt & 0xff;
-        buf[35] = (queueOverflowCnt >> 8) & 0xff; 
-        buf[34] = (queueOverflowCnt >> 16) & 0xff; 
+        buf[35] = (queueOverflowCnt >> 8) & 0xff;
+        buf[34] = (queueOverflowCnt >> 16) & 0xff;
         buf[33] = (queueOverflowCnt >> 24) & 0xff;
 
         /* Ipv6 Overhead */
@@ -215,54 +223,54 @@ int main(void)
         /* Route toward the BR */
         buf[54] = nextHopRloc & 0xff;
         buf[53] = (nextHopRloc >> 8) & 0xff;
-        
+
         buf[55] = borderRouterLC;
         buf[56] = borderRouterRC;
 
         buf[60] = borderRouteChangeCnt & 0xff;
-        buf[59] = (borderRouteChangeCnt >> 8) & 0xff; 
+        buf[59] = (borderRouteChangeCnt >> 8) & 0xff;
         buf[58] = (borderRouteChangeCnt >> 16) & 0xff;
         buf[57] = (borderRouteChangeCnt >> 24) & 0xff;
 
         buf[64] = routeChangeCnt & 0xff;
-        buf[63] = (routeChangeCnt >> 8) & 0xff; 
-        buf[62] = (routeChangeCnt >> 16) & 0xff; 
+        buf[63] = (routeChangeCnt >> 8) & 0xff;
+        buf[62] = (routeChangeCnt >> 16) & 0xff;
         buf[61] = (routeChangeCnt >> 24) & 0xff;
-        
+
         /* Msg Overhead */
         buf[68] = pollMsgCnt & 0xff;
-        buf[67] = (pollMsgCnt >> 8) & 0xff; 
-        buf[66] = (pollMsgCnt >> 16) & 0xff; 
-        buf[65] = (pollMsgCnt >> 24) & 0xff; 
+        buf[67] = (pollMsgCnt >> 8) & 0xff;
+        buf[66] = (pollMsgCnt >> 16) & 0xff;
+        buf[65] = (pollMsgCnt >> 24) & 0xff;
 
         buf[72] = mleMsgCnt & 0xff;
-        buf[71] = (mleMsgCnt >> 8) & 0xff; 
-        buf[70] = (mleMsgCnt >> 16) & 0xff; 
+        buf[71] = (mleMsgCnt >> 8) & 0xff;
+        buf[70] = (mleMsgCnt >> 16) & 0xff;
         buf[69] = (mleMsgCnt >> 24) & 0xff;
 
         buf[76] = mleRouterMsgCnt & 0xff;
-        buf[75] = (mleRouterMsgCnt >> 8) & 0xff; 
-        buf[74] = (mleRouterMsgCnt >> 16) & 0xff; 
+        buf[75] = (mleRouterMsgCnt >> 8) & 0xff;
+        buf[74] = (mleRouterMsgCnt >> 16) & 0xff;
         buf[73] = (mleRouterMsgCnt >> 24) & 0xff;
 
         buf[80] = addrMsgCnt & 0xff;
-        buf[79] = (addrMsgCnt >> 8) & 0xff; 
-        buf[78] = (addrMsgCnt >> 16) & 0xff; 
+        buf[79] = (addrMsgCnt >> 8) & 0xff;
+        buf[78] = (addrMsgCnt >> 16) & 0xff;
         buf[77] = (addrMsgCnt >> 24) & 0xff;
 
         buf[84] = netdataMsgCnt & 0xff;
-        buf[83] = (netdataMsgCnt >> 8) & 0xff; 
-        buf[82] = (netdataMsgCnt >> 16) & 0xff; 
+        buf[83] = (netdataMsgCnt >> 8) & 0xff;
+        buf[82] = (netdataMsgCnt >> 16) & 0xff;
         buf[81] = (netdataMsgCnt >> 24) & 0xff;
 
         /*buf[76] = meshcopMsgCnt & 0xff;
-        buf[75] = (meshcopMsgCnt >> 8) & 0xff; 
-        buf[74] = (meshcopMsgCnt >> 16) & 0xff; 
+        buf[75] = (meshcopMsgCnt >> 8) & 0xff;
+        buf[74] = (meshcopMsgCnt >> 16) & 0xff;
         buf[73] = (meshcopMsgCnt >> 24) & 0xff;
 
         buf[76] = tmfMsgCnt & 0xff;
-        buf[75] = (tmfMsgCnt >> 8) & 0xff; 
-        buf[74] = (tmfMsgCnt >> 16) & 0xff; 
+        buf[75] = (tmfMsgCnt >> 8) & 0xff;
+        buf[74] = (tmfMsgCnt >> 16) & 0xff;
         buf[73] = (tmfMsgCnt >> 24) & 0xff;*/
 
         buf[88] = totalSerialMsgCnt & 0xff;
@@ -275,7 +283,7 @@ int main(void)
             DEBUG("error in set length\n");
         }
         otMessageWrite(message, 0, buf, PAYLOAD_SIZE);
-		
+
         DEBUG("\n[Main] Tx UDP packet %u\n", buf[3]*256+buf[4]);
         error = otUdpSend(&mSocket, message, &messageInfo);
         if (error != OT_ERROR_NONE) {
