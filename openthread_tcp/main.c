@@ -130,13 +130,13 @@ extern int sent_pkts;
 extern int recv_pkts;
 
 void print_tcp_stats(void) {
-    printf("Sent %d TCP segments\n", (int) sent_pkts);
-    printf("Received %d TCP segments\n", (int) recv_pkts);
+    printf("[TCP main] SegsSent %d\n", (int) sent_pkts);
+    printf("[TCP main] SegsRcvd %d\n", (int) recv_pkts);
 #ifdef CPU_DUTYCYCLE_MONITOR
-    printf("CPU: on = %llu, off = %llu\n", cpuOnTime, cpuOffTime);
+    printf("[TCP main] CPU %u %u\n", (unsigned int) cpuOnTime, (unsigned int) cpuOffTime);
 #endif
 #ifdef RADIO_DUTYCYCLE_MONITOR
-    printf("Radio: on = %llu, off = %llu\n", radioOnTime, radioOffTime);
+    printf("[TCP main] radio %u %u\n", (unsigned int) radioOnTime, (unsigned int) radioOffTime);
 #endif
 }
 
@@ -180,7 +180,7 @@ int tcp_receiver(void (*onaccept)(void), void (*onfinished)(int)) {
                 onaccept();
             }
             volatile uint64_t t1 = xtimer_now_usec64();
-            printf("Time = %llu, Received: 0\n", xtimer_now_usec64());
+            printf("[TCP main] read 0 %u\n", (unsigned int) xtimer_now_usec64());
             while (total_received != TOTAL_BYTES) {
                 size_t readsofar = 0;
                 ssize_t r;
@@ -200,11 +200,11 @@ int tcp_receiver(void (*onaccept)(void), void (*onfinished)(int)) {
 
                 /* Print for every 1024 bytes received. */
                 if ((total_received & 0x3FF) == 0) {
-                    printf("Time = %llu, Received: %d\n", xtimer_now_usec64(), (int) total_received);
+                    printf("[TCP main] read %d %u\n", (int) total_received, (unsigned int) xtimer_now_usec64());
                 }
             }
             volatile uint64_t t2 = xtimer_now_usec64();
-            printf("Total time is %d\n", (int) ((t2 - t1) / 1000));
+            printf("[TCP main] time %d\n", (int) ((t2 - t1) / 1000));
             print_tcp_stats();
 
             if (onfinished != NULL) {
@@ -268,7 +268,7 @@ int tcp_sender(const char* receiver_ip, void (*ondone)(int)) {
 
     int i;
     size_t total_sent = 0;
-    printf("Time = %llu, Sent: 0\n", xtimer_now_usec64());
+    printf("[TCP main] sent 0 %u\n", (unsigned int) xtimer_now_usec64());
     for (i = 0; i != NUM_BLOCKS; i++) {
         rv = send(sock, sendbuffer, BLOCK_SIZE, 0);
         if (rv == -1) {
@@ -277,7 +277,7 @@ int tcp_sender(const char* receiver_ip, void (*ondone)(int)) {
         }
         total_sent += BLOCK_SIZE;
         if ((total_sent & 0x3FF) == 0) {
-            printf("Time = %llu, Sent: %d\n", xtimer_now_usec64(), (int) total_sent);
+            printf("[TCP main] %d %u\n", (int) total_sent, (unsigned int) xtimer_now_usec64());
         }
     }
 
@@ -388,7 +388,7 @@ int main(void)
     rv = tcp_sender(SENDTO_ADDR, NULL);
     volatile uint64_t t2 = xtimer_now_usec64();
     printf("Total time is %d\n", (int) ((t2 - t1) / 1000));
-    printf("CPU: on = %llu, off = %llu\n", cpuOnTime, cpuOffTime);
+    print_tcp_stats();
 #endif
 
     if (rv == 0) {
