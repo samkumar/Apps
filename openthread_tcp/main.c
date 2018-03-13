@@ -180,6 +180,10 @@ int tcp_receiver(void (*onaccept)(void), void (*onfinished)(int)) {
                 onaccept();
             }
             volatile uint64_t t1 = xtimer_now_usec64();
+            radioOnTime = 0;
+            radioOffTime = 0;
+            cpuOnTime = 0;
+            cpuOffTime = 0;
             printf("[TCP main] read 0 %u\n", (unsigned int) xtimer_now_usec64());
             while (total_received != TOTAL_BYTES) {
                 size_t readsofar = 0;
@@ -380,10 +384,14 @@ int main(void)
     otIp6AddUnsecurePort(openthread_get_instance(), RECEIVER_PORT);
     rv = tcp_receiver(NULL, NULL);
 #else
+    otIp6AddUnsecurePort(openthread_get_instance(), SENDER_PORT);
     printf("Waiting for 5 seconds...\n");
     xtimer_usleep(5000000L);
     printf("Running tcp_sender program\n");
-    otIp6AddUnsecurePort(openthread_get_instance(), SENDER_PORT);
+    radioOnTime = 0;
+    radioOffTime = 0;
+    cpuOnTime = 0;
+    cpuOffTime = 0;
     volatile uint64_t t1 = xtimer_now_usec64();
     rv = tcp_sender(SENDTO_ADDR, NULL);
     volatile uint64_t t2 = xtimer_now_usec64();
