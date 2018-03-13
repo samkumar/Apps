@@ -128,6 +128,7 @@ uint32_t totalSerialMsgCnt = 0;
 
 extern int sent_pkts;
 extern int recv_pkts;
+extern mutex_t tcp_lock;
 
 void print_tcp_stats(void) {
     printf("[TCP main] SegsSent %d\n", (int) sent_pkts);
@@ -184,7 +185,9 @@ int tcp_receiver(void (*onaccept)(void), void (*onfinished)(int)) {
             radioOffTime = 0;
             cpuOnTime = 0;
             cpuOffTime = 0;
+            mutex_lock(&tcp_lock);
             printf("[TCP main] read 0 %u\n", (unsigned int) xtimer_now_usec64());
+            mutex_unlock(&tcp_lock);
             while (total_received != TOTAL_BYTES) {
                 size_t readsofar = 0;
                 ssize_t r;
@@ -204,7 +207,9 @@ int tcp_receiver(void (*onaccept)(void), void (*onfinished)(int)) {
 
                 /* Print for every 1024 bytes received. */
                 if ((total_received & 0x3FF) == 0) {
+                    mutex_lock(&tcp_lock);
                     printf("[TCP main] read %d %u\n", (int) total_received, (unsigned int) xtimer_now_usec64());
+                    mutex_unlock(&tcp_lock);
                 }
             }
             volatile uint64_t t2 = xtimer_now_usec64();
@@ -272,7 +277,9 @@ int tcp_sender(const char* receiver_ip, void (*ondone)(int)) {
 
     int i;
     size_t total_sent = 0;
+    mutex_lock(&tcp_lock);
     printf("[TCP main] sent 0 %u\n", (unsigned int) xtimer_now_usec64());
+    mutex_unlock(&tcp_lock);
     for (i = 0; i != NUM_BLOCKS; i++) {
         rv = send(sock, sendbuffer, BLOCK_SIZE, 0);
         if (rv == -1) {
@@ -281,7 +288,9 @@ int tcp_sender(const char* receiver_ip, void (*ondone)(int)) {
         }
         total_sent += BLOCK_SIZE;
         if ((total_sent & 0x3FF) == 0) {
+            mutex_lock(&tcp_lock);
             printf("[TCP main] %d %u\n", (int) total_sent, (unsigned int) xtimer_now_usec64());
+            mutex_unlock(&tcp_lock);
         }
     }
 
