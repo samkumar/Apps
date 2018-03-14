@@ -144,7 +144,9 @@ void print_tcp_stats(void) {
 #endif
     int i;
     for (i = 0; i != 50; i++) {
+        mutex_unlock(&tcp_lock);
         xtimer_usleep(100000);
+        mutex_lock(&tcp_lock);
         printf("[TCP lt] %d %u\n", i, (unsigned int) link_vector[i]);
     }
     mutex_unlock(&tcp_lock);
