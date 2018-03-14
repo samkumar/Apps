@@ -39,6 +39,8 @@
 #define ENABLE_DEBUG (1)
 #include "debug.h"
 
+uint32_t link_vector[50];
+
 struct benchmark_stats {
     uint64_t time_micros;
     uint32_t hamilton_tcp_segs_sent;
@@ -139,6 +141,10 @@ void print_tcp_stats(void) {
 #ifdef RADIO_DUTYCYCLE_MONITOR
     printf("[TCP main] radio %u %u\n", (unsigned int) radioOnTime, (unsigned int) radioOffTime);
 #endif
+   int i;
+    for (i = 0; i != 50; i++) {
+        printf("[TCP main] linktries %d -> %u\n", i, (unsigned int) link_vector[i]);
+    }
 }
 
 int tcp_receiver(void (*onaccept)(void), void (*onfinished)(int)) {
@@ -391,6 +397,7 @@ int main(void)
 #ifdef I_AM_RECEIVER
     printf("Running tcp_receiver program\n");
     otIp6AddUnsecurePort(openthread_get_instance(), RECEIVER_PORT);
+    memset(&link_vector, 0x00, sizeof(link_vector));
     rv = tcp_receiver(NULL, NULL);
 #else
     otIp6AddUnsecurePort(openthread_get_instance(), SENDER_PORT);
@@ -402,6 +409,7 @@ int main(void)
     cpuOnTime = 0;
     cpuOffTime = 0;
     volatile uint64_t t1 = xtimer_now_usec64();
+    memset(&link_vector, 0x00, sizeof(link_vector));
     rv = tcp_sender(SENDTO_ADDR, NULL);
     volatile uint64_t t2 = xtimer_now_usec64();
     printf("Total time is %d\n", (int) ((t2 - t1) / 1000));
