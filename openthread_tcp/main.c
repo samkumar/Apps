@@ -223,7 +223,7 @@ int tcp_receiver(void (*onaccept)(void), void (*onfinished)(int)) {
             volatile uint64_t t2 = xtimer_now_usec64();
             mutex_lock(&tcp_lock);
             printf("[TCP main] time %d\n", (int) ((t2 - t1) / 1000));
-            mutex_unlock(&tcp_unlock);
+            mutex_unlock(&tcp_lock);
             print_tcp_stats();
 
             if (onfinished != NULL) {
