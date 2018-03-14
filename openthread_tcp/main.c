@@ -133,6 +133,7 @@ extern int recv_pkts;
 extern mutex_t tcp_lock;
 
 void print_tcp_stats(void) {
+    mutex_lock(&tcp_lock);
     printf("[TCP main] SegsSent %d\n", (int) sent_pkts);
     printf("[TCP main] SegsRcvd %d\n", (int) recv_pkts);
 #ifdef CPU_DUTYCYCLE_MONITOR
@@ -141,10 +142,11 @@ void print_tcp_stats(void) {
 #ifdef RADIO_DUTYCYCLE_MONITOR
     printf("[TCP main] radio %u %u\n", (unsigned int) radioOnTime, (unsigned int) radioOffTime);
 #endif
-   int i;
+    int i;
     for (i = 0; i != 50; i++) {
         printf("[TCP main] linktries %d -> %u\n", i, (unsigned int) link_vector[i]);
     }
+    mutex_unlock(&tcp_lock);
 }
 
 int tcp_receiver(void (*onaccept)(void), void (*onfinished)(int)) {
@@ -219,7 +221,9 @@ int tcp_receiver(void (*onaccept)(void), void (*onfinished)(int)) {
                 }
             }
             volatile uint64_t t2 = xtimer_now_usec64();
+            mutex_lock(&tcp_lock);
             printf("[TCP main] time %d\n", (int) ((t2 - t1) / 1000));
+            mutex_unlock(&tcp_unlock);
             print_tcp_stats();
 
             if (onfinished != NULL) {
@@ -412,7 +416,9 @@ int main(void)
     memset(&link_vector, 0x00, sizeof(link_vector));
     rv = tcp_sender(SENDTO_ADDR, NULL);
     volatile uint64_t t2 = xtimer_now_usec64();
-    printf("Total time is %d\n", (int) ((t2 - t1) / 1000));
+    mutex_lock(&tcp_lock);
+    printf("[TCP main] time %d\n", (int) ((t2 - t1) / 1000));
+    mutex_unlock(&tcp_lock);
     print_tcp_stats();
 #endif
 
