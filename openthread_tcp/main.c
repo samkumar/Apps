@@ -130,12 +130,14 @@ uint32_t totalSerialMsgCnt = 0;
 
 extern int sent_pkts;
 extern int recv_pkts;
+extern int bad_cksum_pkts;
 extern mutex_t tcp_lock;
 
 void print_tcp_stats(void) {
     mutex_lock(&tcp_lock);
-    printf("[TCP main] SegsSent %d\n", (int) sent_pkts);
-    printf("[TCP main] SegsRcvd %d\n", (int) recv_pkts);
+    printf("[TCP main] SegsSent %d\n", sent_pkts);
+    printf("[TCP main] SegsRcvd %d\n", recv_pkts);
+    printf("[TCP main] SegsBadCksum %d\n", bad_cksum_pkts);
 #ifdef CPU_DUTYCYCLE_MONITOR
     printf("[TCP main] CPU %u %u\n", (unsigned int) cpuOnTime, (unsigned int) cpuOffTime);
 #endif
