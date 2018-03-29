@@ -114,6 +114,7 @@ uint32_t tmfMsgCnt = 0;
 uint32_t totalSerialMsgCnt = 0;
 
 #define I_AM_RECEIVER
+#define I_AM_RELAY
 
 #define RPI_PORT 4992
 #define RECEIVER_PORT 40000
@@ -404,6 +405,13 @@ int main(void)
     DEBUG("\n[Main] Trying TCP\n");
 
     int rv;
+
+#ifdef I_AM_RELAY
+    for (;;) {
+        xtimer_usleep(100000000ul);
+        print_tcp_stats();
+    }
+#endif
 
 #ifdef I_AM_RECEIVER
     printf("Running tcp_receiver program\n");
