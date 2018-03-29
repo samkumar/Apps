@@ -121,7 +121,7 @@ uint32_t totalSerialMsgCnt = 0;
 
 /* Controls sender. */
 #define BLOCK_SIZE 2048
-#define NUM_BLOCKS 50
+#define NUM_BLOCKS 2048
 
 #define TOTAL_BYTES (BLOCK_SIZE * NUM_BLOCKS)
 
@@ -248,11 +248,12 @@ int tcp_receiver(void (*onaccept)(void), void (*onfinished)(int)) {
 }
 
 int tcp_sender(const char* receiver_ip, void (*ondone)(int)) {
-    static char sendbuffer[BLOCK_SIZE];
+    //static char sendbuffer[BLOCK_SIZE];
     static const char* data = "The Internet is the global system of interconnected computer networks that use the Internet protocol suite (TCP/IP) to link billions of devices worldwide. It is a network of networks that consists of millions of private, public, academic, business, and government networks of local to global scope, linked by a broad array of electronic, wireless, and optical networking technologies. The Internet carries an extensive range of information resources and services, such as the inter-linked hypertext documents and applications of the World Wide Web (WWW), electronic mail, telephony, and peer-to-peer networks for file sharing.\nAlthough the Internet protocol suite has been widely used by academia and the military industrial complex since the early 1980s, events of the late 1980s and 1990s such as more powerful and affordable computers, the advent of fiber optics, the popularization of HTTP and the Web browser, and a push towards opening the technology to commerce eventually incorporated its services and technologies into virtually every aspect of contemporary life.\nThe impact of the Internet has been so immense that it has been referred to as the '8th continent'.\nThe origins of the Internet date back to research and development commissioned by the United States government, the Government of the UK and France in the 1960s to build robust, fault-tolerant communication via computer networks. This work, led to the primary precursor networks, the ARPANET, in the United States, the Mark 1 NPL network in the United Kingdom and CYCLADES in France. The interconnection of regional academic networks in the 1980s marks the beginning of the transition to the modern Internet. From the late 1980s onward, the network experienced sustained exponential growth as generations of institutional, personal, and mobile computers were connected to it.\nInternet use grew rapidly in the West from the mid-1990s and from the late 1990s in the developing world. In the 20 years since 1995, Internet use has grown 100-times, measured for the period of one ";
 
     /* Fill up the sendbuffer. */
-    strncpy(sendbuffer, data, BLOCK_SIZE);
+    //strncpy(sendbuffer, data, BLOCK_SIZE);
+    char* sendbuffer = (char*) data;
 
     int sock = socket(AF_INET6, SOCK_STREAM, 0);
     if (sock == -1) {
@@ -386,7 +387,7 @@ void onfinished(int fd) {
 //#define SENDTO_ADDR "2001:470:4889::114"
 // #define SENDTO_ADDR "fdde:ad00:beef:0000:7fbd:d4c2:9fca:c31a"
 //#define SENDTO_ADDR "fdde:ad00:beef:0000:9a93:b693:abfa:9def"
-#define SENDTO_ADDR "fdde:ad00:beef:0:e9f0:45bc:c507:6f0e"
+#define SENDTO_ADDR "fdde:ad00:beef:0:8a1e:671f:0402:fdbe"
 //#define SENDTO_ADDR "2001:470:4a71:0:b135:ddac:9366:2bb8"
 
 int main(void)
@@ -411,8 +412,8 @@ int main(void)
     rv = tcp_receiver(NULL, NULL);
 #else
     otIp6AddUnsecurePort(openthread_get_instance(), SENDER_PORT);
-    printf("Waiting for 5 seconds...\n");
-    xtimer_usleep(5000000L);
+    printf("Waiting for 300 seconds...\n");
+    xtimer_usleep(300000000L);
     printf("Running tcp_sender program\n");
     radioOnTime = 0;
     radioOffTime = 0;
