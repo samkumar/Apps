@@ -410,21 +410,14 @@ int main(void)
 
     DEBUG("\n[Main] Trying TCP\n");
 
-    int rv;
-
-#ifdef I_AM_RELAY
-    for (;;) {
-        xtimer_usleep(100000000ul);
-        print_tcp_stats();
-    }
-#endif
+    int rv = 0;
 
 #ifdef I_AM_RECEIVER
     printf("Running tcp_receiver program\n");
     otIp6AddUnsecurePort(openthread_get_instance(), RECEIVER_PORT);
     memset(&link_vector, 0x00, sizeof(link_vector));
     rv = tcp_receiver(NULL, NULL);
-#else
+#elif !defined(I_AM_RELAY)
     otIp6AddUnsecurePort(openthread_get_instance(), SENDER_PORT);
     printf("Waiting for 300 seconds...\n");
     xtimer_usleep(300000000L);
@@ -450,7 +443,10 @@ int main(void)
     }
 
     while (1) {
-        xtimer_usleep(10000000UL);
+        for (;;) {
+            xtimer_usleep(100000000ul);
+            print_tcp_stats();
+        }
     }
 
     return 0;
