@@ -115,6 +115,7 @@ uint32_t totalSerialMsgCnt = 0;
 
 #define I_AM_RECEIVER
 #define I_AM_RELAY
+#define TIME_BASED_SENDER
 
 #define RPI_PORT 4992
 #define RECEIVER_PORT 40000
@@ -123,6 +124,7 @@ uint32_t totalSerialMsgCnt = 0;
 /* Controls sender. */
 #define BLOCK_SIZE 2048
 #define NUM_BLOCKS 2048
+#define SEND_MICRO 300000000
 
 #define TOTAL_BYTES (BLOCK_SIZE * NUM_BLOCKS)
 
@@ -292,12 +294,16 @@ int tcp_sender(const char* receiver_ip, void (*ondone)(int)) {
         return -1;
     }
 
-    int i;
     size_t total_sent = 0;
     mutex_lock(&tcp_lock);
     printf("[TCP main] sent 0 %u\n", (unsigned int) xtimer_now_usec64());
     mutex_unlock(&tcp_lock);
-    for (i = 0; i != NUM_BLOCKS; i++) {
+#ifdef TIME_BASED_SENDER
+    uint64_t start = xtimer_now_usec64();
+    while (xtimer_now_usec64() - start < UINT64_C(SEND_MICRO)) {
+#else
+    for (int i = 0; i != NUM_BLOCKS; i++) {
+#endif
         rv = send(sock, sendbuffer, BLOCK_SIZE, 0);
         if (rv == -1) {
             perror("send");
